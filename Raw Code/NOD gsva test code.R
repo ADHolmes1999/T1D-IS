@@ -33,7 +33,6 @@ BiocManager::install("GSVA", version="3.19", force=TRUE)
 BiocManager::install("beachmat", version="3.19", force=TRUE)
 
 
-
 install.packages("remotes")
 library(remotes)
 install_github("rcastelo/GSVA")
