@@ -19,7 +19,7 @@ library(tidyverse)
 ## THIS WILL HAVE TO BE DONE ON NON-DIABs TOO FOR COMPARING (SAME CODE JUST DIFF DATASETS)
 
 # Load gene expression data 
-gene_expected_count <- read_csv("Data/gene_expected_count.annot.csv") # all in one dataset
+gene_expected_count <- read_csv("project/Data/gene_expected_count.annot.csv") # all in one dataset
 
 #Filtering only the genes of interest
  gene_expected<-gene_expected_count %>% 
@@ -34,18 +34,26 @@ rm(gene_expected_count)
 nod_sample_1 <-gene_expected %>% select(entrezgene_id, external_gene_name,`6872-JK-1`,`6872-JK-6`,`6872-JK-11`,`6872-JK-16`,`6872-JK-21`)
 
 # NOD Sample 2
-gene_expected %>% select(entrezgene_id,external_gene_name,`6872-JK-2`,`6872-JK-7`,`6872-JK-12`,`6872-JK-17`,`6872-JK-22`)
+nod_sample_2 <-gene_expected %>% select(entrezgene_id,external_gene_name,`6872-JK-2`,`6872-JK-7`,`6872-JK-12`,`6872-JK-17`,`6872-JK-22`)
 
 # NOD Sample 3
-gene_expected %>% select(entrezgene_id,external_gene_name,`6872-JK-3`,`6872-JK-8`,`6872-JK-13`,`6872-JK-18`,`6872-JK-23`)
+nod_sample_3 <-gene_expected %>% select(entrezgene_id,external_gene_name,`6872-JK-3`,`6872-JK-8`,`6872-JK-13`,`6872-JK-18`,`6872-JK-23`)
 
 # NOD Sample 4
-gene_expected %>% select(entrezgene_id,external_gene_name,`6872-JK-4`,`6872-JK-9`,`6872-JK-14`,`6872-JK-19`,`6872-JK-24`)
+nod_sample_4 <-gene_expected %>% select(entrezgene_id,external_gene_name,`6872-JK-4`,`6872-JK-9`,`6872-JK-14`,`6872-JK-19`,`6872-JK-24`)
 
 # NOD Sample 5
-gene_expected %>% select(entrezgene_id,external_gene_name,`6872-JK-77`,`6872-JK-10`,`6872-JK-15`,`6872-JK-20`,`6872-JK-25`)
+nod_sample_5 <-gene_expected %>% select(entrezgene_id,external_gene_name,`6872-JK-77`,`6872-JK-10`,`6872-JK-15`,`6872-JK-20`,`6872-JK-25`)
 
-# NOD (AHM) Samples -------------------------------------------------------
+# Combining Data sets
+NOD_dataset<- nod_sample_1 %>% 
+  full_join(nod_sample_2) %>% full_join(nod_sample_3) %>%
+  full_join(nod_sample_4) %>% full_join(nod_sample_5)
+
+#removing the NOD sample datasets for now
+rm(nod_sample_1,nod_sample_2,nod_sample_3,nod_sample_4,nod_sample_5)
+
+# NOD (AHM) Samples [IGNORE] -------------------------------------------------------
 
 # AHM NOD Sample 1
 gene_expected %>% select(entrezgene_id,external_gene_name,`6872-JK-71`,`6872-JK-73`,`6872-JK-75`)
@@ -77,19 +85,24 @@ gene_expected %>% select(entrezgene_id,external_gene_name,`6872-JK-30`,`6872-JK-
 # NS Samples --------------------------------------------------------------
 
 # NS Sample 1
-gene_expected %>% select(entrezgene_id,external_gene_name,`6872-JK-51`,`6872-JK-55`,`6872-JK-59`,`6872-JK-63`,`6872-JK-67`)
+ns_sample_1 <-gene_expected %>% select(entrezgene_id,external_gene_name,`6872-JK-51`,`6872-JK-55`,`6872-JK-59`,`6872-JK-63`,`6872-JK-67`)
 
 # NS Sample 2 == Seq 52 missing or the real column is 52_REPREP
-gene_expected %>% select(entrezgene_id,external_gene_name,#`6872-JK-52`,
-                               `6872-JK-56`,`6872-JK-60`,`6872-JK-64`,`6872-JK-68`)
+ns_sample_2 <-gene_expected %>% select(entrezgene_id,external_gene_name,`6872-JK-52-REPREP`,`6872-JK-56`,`6872-JK-60`,`6872-JK-64`,`6872-JK-68`)
 
 # NS Sample 3
-gene_expected %>% select(entrezgene_id,external_gene_name,`6872-JK-53`,`6872-JK-57`,`6872-JK-61`,`6872-JK-65`,`6872-JK-69`)
+ns_sample_3 <-gene_expected %>% select(entrezgene_id,external_gene_name,`6872-JK-53`,`6872-JK-57`,`6872-JK-61`,`6872-JK-65`,`6872-JK-69`)
 
 # NS Sample 4
-gene_expected %>% select(entrezgene_id,external_gene_name,`6872-JK-54`,`6872-JK-58`,`6872-JK-62`,`6872-JK-66`,`6872-JK-70`)
+ns_sample_4 <-gene_expected %>% select(entrezgene_id,external_gene_name,`6872-JK-54`,`6872-JK-58`,`6872-JK-62`,`6872-JK-66`,`6872-JK-70`)
 
 # NS Sample 5 = none
+
+NS_dataset<-ns_sample_1 %>% full_join(ns_sample_2) %>%
+  full_join(ns_sample_3) %>%full_join(ns_sample_4)
+
+#
+rm(ns_sample_1,ns_sample_2,ns_sample_3,ns_sample_4)
 
 # Free up some more space and RAM
 rm(gene_expected)

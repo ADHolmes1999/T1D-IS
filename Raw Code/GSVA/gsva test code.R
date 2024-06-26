@@ -31,62 +31,39 @@ library(readxl)
 # GSVA requires a matrix so make sure there are no duplicates
 sum(duplicated(gene_expected_count$entrezgene_id)) # = 34235
 
- # First let's determine the gene means
- gene_means <- rowMeans(gene_expected %>% dplyr::select(-Ensembl, -entrez_id))
+#Mutate duplicate column for Entrezgene IDs
+gene_expected_count<-gene_expected_count %>% mutate("Duplicate1"=duplicated(entrezgene_id),
+                                                    "Duplicate2"=duplicated(external_gene_name))
 
- # Let's add this as a column in our `mapped_df`.
- gene_expected <- gene_expected %>%
-   # Add gene_means as a column called gene_means
-   dplyr::mutate(gene_means) %>%
-   # Reorder the columns so `gene_means` column is upfront
-   dplyr::select(Ensembl, entrez_id, gene_means, dplyr::everything())
-
- # This is the new data set without duplication
- filtered_gene_expected <- gene_expected %>%
-   # Sort so that the highest mean expression values are at the top
-   dplyr::arrange(dplyr::desc(gene_means)) %>%
-   # Filter out the duplicated rows using `dplyr::distinct()`
-   dplyr::distinct(entrez_id, .keep_all = TRUE)
+#Filtering out the duplcates
+gene_expected_count<-gene_expected_count %>% filter(Duplicate1==FALSE,
+                                                    Duplicate2==FALSE)
 
 # Checking once again
-sum(duplicated(filtered_mapped_df$entrez_id)) # should = 0
+sum(duplicated(gene_expected_count$entrezgene_id)) # should = 0
 
 # Matrix for GSVA ---------------------------------------------------------
 
 # IF YOU RUN PREVIOUS CHUNK, change gene_expected to filtered_gene_expected
-gene_expected_matrix <- gene_expected %>%
+gene_expected_matrix <- gene_expected_count %>%
   # GSVA can't the Ensembl IDs so we should drop this column as well as the means
-  dplyr::select(-Ensembl, -gene_means) %>%
+  dplyr::select(-Duplicate1,-Duplicate2,-entrezgene_id, -gene_id,-description) %>%
   # We need to store our gene identifiers as row names
-  tibble::column_to_rownames("entrez_id") %>%
+  tibble::column_to_rownames("external_gene_name") %>%
   # Now we can convert our object into a matrix
   as.matrix()
 
 # Results ---------------------------------------------------------
 
-# Make hallmarks list
-hallmarks_list <- split(
-  gene_expected_count$entrezgene_id, # The genes we want split into pathways
-  gene_expected_count$external_gene_name # The pathways made as the higher levels of the list
-)
+# Makes hallmarks list
+hallmarks_list <- list(gene_expected_count$external_gene_name)
 
-# The gsva() function documentation says use kcdf = "Gaussian" if expression values are continuous such as log-CPMs, log-RPKMs or log-TPMs. Use kcdf = "Poisson" on integer counts. 
-# What is our vst() transformed data? I am guessing log2-like scale, so Gaussian works for us.
-gsva_results <- gsva(
-  gene_expected_matrix,
-  hallmarks_list,
-  method = "gsva",
-  # Appropriate for our vst transformed data
-  kcdf = "Gaussian",
-  # Minimum gene set size, may need to change
-  min.sz = 15,
-  # Maximum gene set size, may need to change
-  max.sz = 500,
-  # Compute Gaussian-distributed scores, play around with this
-  mx.diff = TRUE,
-  # Don't print out the progress bar, play around with this
-  verbose = FALSE
-)
+# Param used in gsva()
+gsva_param<-GSVA::gsvaParam(gene_expected_matrix,hallmarks_list)
+
+#GSVA Function Results
+gsva_results<-GSVA::gsva(gsva_param)
+
 
 # Print 10 rows (checking the data out)
 head(gsva_results[, 1:10])
